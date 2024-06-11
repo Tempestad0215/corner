@@ -44,12 +44,25 @@ const logout = () => {
                                 <Link :href="route('dashboard')">
                                     <ApplicationMark class="block h-9 w-auto" />
                                 </Link>
+
                             </div>
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
+                                    Inicio
+                                </NavLink>
+                                <NavLink :href="route('sale.index')" >
+                                    Ventas
+                                </NavLink>
+                                <NavLink :href="route('category.index')" >
+                                    Categorias
+                                </NavLink>
+                                <NavLink :href="route('dashboard')">
+                                    Productos
+                                </NavLink>
+                                <NavLink :href="route('dashboard')">
+                                    Entrada
                                 </NavLink>
                             </div>
                         </div>
