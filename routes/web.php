@@ -20,6 +20,8 @@ Route::name('category.')->controller(CategoryController::class)
     ->prefix('category')
     ->group(function(){
         Route::get('/','index')->name('index');
+        Route::post('/','store')->name('store');
+        Route::patch('/{code}','update')->name('update');
     });
 
 

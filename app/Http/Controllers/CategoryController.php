@@ -14,9 +14,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        // Sacar los datos
+        $data = Category::where('status', false)
+            ->simplePaginate(15);
 
-        return Inertia::render('Categories/Index');
+        // Devolve los datos
+        return Inertia::render('Categories/Index',[
+            'categories' => $data
+        ]);
     }
 
     /**
@@ -32,7 +37,26 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        //
+        try {
+
+            // Numero
+            $count = Category::count();
+
+            // Si tiene mas de 200 categoria
+            if($count > 199 )
+            {
+                return back()->with('name','Por favor ya no es posible crear mas categoria, contacte el soporte');
+            }
+
+            // Guardar los datos validado
+            Category::create($request->validated());
+
+            // Devolver hacia atras
+            return back();
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     /**
@@ -54,9 +78,28 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, String $code)
     {
-        //
+        try {
+            // Conseguir el primer categoria con las descripcio hecha
+            $category = Category::where('status', true)
+                ->where('code', $code)
+                ->first();
+
+            // Actualizar los datos
+            $category->name = $request->name;
+            $category->description = $request->description;
+
+            // Guardar los datos
+            $category->save();
+
+            // Retornar hacia atras
+            return back();
+
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     /**

@@ -5,3 +5,34 @@
 [x-cloak] {
     display: none;
 }
+
+
+@layer components{
+
+    /* Botones para la app */
+    .btn-send{
+        @apply border-2 border-gray-500  hover:bg-gray-600 hover:text-white duration-300 px-2 py-1 rounded-2xl;
+    }
+    .btn-reset{
+        @apply border-2 border-gray-500 hover:bg-gray-600 hover:text-white duration-300 px-2 py-1 rounded-2xl;
+    }
+
+    /* Formulario */
+
+    /* Ancho del formulario */
+    .form{
+        @apply bg-white shadow-2xl lg:max-w-screen-sm rounded-2xl mt-5 p-5 mx-auto;
+    }
+
+
+    /* Entrada de texto */
+    .input{
+        @apply rounded-2xl;
+    }
+
+
+    /* Titulo de todo */
+    .titulo{
+        @apply text-2xl font-bold text-center;
+    }
+}
