@@ -1,8 +1,9 @@
 <script setup>
-import { Head, router, useForm } from '@inertiajs/vue3';
-import AppLayout from '../../Layouts/AppLayout.vue';
-import InputError from '@/Components/InputError.vue';
-
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import AppLayout from "../../Layouts/AppLayout.vue";
+import InputError from "@/Components/InputError.vue";
+import { successHttp } from "@/Helpers/alert";
+import Swal from "sweetalert2";
 
 const props = defineProps({
     categories:{
@@ -20,19 +21,67 @@ const form = useForm({
     update: false
 });
 
+// Formulario de busqueda
+const formSearch = useForm({
+    search:""
+});
+
+
+// Elimianr la categoria seleccionada
+const destroy = (item) => {
+    Swal.fire({
+        title: "Esta seguro?",
+        html: `<p>Desea eliminar la Categoria : <strong> ${item.name}</strong> , los cambios realizados son irreversible!</P>`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        cancelButtonText: "Cancelar",
+        confirmButtonText: "Si, eliminar!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            router.patch(route('category.destroy', item.code),{},{
+                onSuccess:()=>{
+                    // Mensaje de exito
+                    successHttp('Registro eliminado correctamente');
+                },
+                preserveScroll: true,
+                preserveState: true
+            });
+        }
+});
+}
+
 
 
 // Funcion para enviar
 const submit = () => {
 
-    // Enviar los datos
-    form.post(route('category.store'),{
-        onSuccess:()=>{
-            // Limpiar los datos
-            form.reset();
+    if(form.update)
+    {
+        form.patch(route("category.update", form.code),{
+            onSuccess:()=>{
+                // Mensaje de exito
+                successHttp("Registro actualizado correctamente");
 
-        }
-    })
+                // Limpiar los datos
+                form.reset();
+            }
+        })
+    }else{
+
+        // Enviar los datos
+        form.post(route("category.store"),{
+            onSuccess:()=>{
+                // Mensaje de exito
+                successHttp("Registro creado correctamente");
+                // Limpiar los datos
+                form.reset();
+
+            }
+        });
+    }
 }
 
 // Edotar los datos
@@ -41,6 +90,16 @@ const edit = (item) => {
     form.name = item.name;
     form.description = item.description;
     form.update = true;
+}
+
+
+// Datos de busqueda
+const search = () => {
+    // Buscar los datos en la busqueda
+    formSearch.get(route("category.index"),{
+        preserveScroll: true,
+        preserveState: true
+    });
 }
 
 
@@ -133,10 +192,34 @@ const edit = (item) => {
                 <hr>
             </div>
             <!-- Tabla del contenido de los datos -->
-            <div class="mt-5">
+            <div class="mt-5  bg-white mx-5 p-5 rounded-2xl shadow-2xl">
                 <h3 class="titulo" >
                     Tabla de categoria
                 </h3>
+
+                <!-- Formulario para busqueda -->
+                <form
+                    @submit.prevent="search"
+                    class=" lg:max-w-md" >
+                    <div>
+                        <label
+                            class="block"
+                            for="name">
+                            Buscar
+                        </label>
+                        <div class=" relative flex items-center">
+                            <input
+                                class="input w-full pr-10"
+                                placeholder="Busqueda"
+                                type="text"
+                                v-model="formSearch.search">
+                            <!-- Boton para la busqueda -->
+                            <i
+                                @click="search"
+                                class="fa-solid fa-magnifying-glass text-2xl absolute inset-y-0 right-0 py-1 px-3 "></i>
+                        </div>
+                    </div>
+                </form>
 
                 <!-- Tabla de los datos -->
                 <table class=" table-auto w-full">
@@ -153,24 +236,55 @@ const edit = (item) => {
                     <!-- Contenido de la cabeza -->
                      <tbody>
                         <tr
-                            class=" odd:bg-gray-300"
+                            class=" odd:bg-gray-300 rounded-2xl"
                             v-for="(item, index) in categories.data" >
-                            <td>{{item.code}}</td>
-                            <td>{{item.name}}</td>
-                            <td>{{item.description}}</td>
-                            <td class=" space-x-5" >
+                            <td class=" px-2">{{item.code}}</td>
+                            <td class=" px-2">{{item.name}}</td>
+                            <td class=" px-2">{{item.description}}</td>
+                            <td class=" px-2 space-x-5 text-xl" >
                                 <!-- Editar -->
                                 <i
                                     @click="edit(item)"
-                                    class="fa-regular fa-pen-to-square"></i>
+                                    class="fa-regular fa-pen-to-square hover:scale-125 duration-300"></i>
                                 <!-- Eliminar -->
                                 <i
-                                    @click="destroy(item.code)"
-                                    class="fa-solid fa-trash-can"></i>
+                                    @click="destroy(item)"
+                                    class="fa-solid fa-trash-can hover:scale-125 duration-300"></i>
                             </td>
                         </tr>
                      </tbody>
                 </table>
+
+                <!-- Linea divisora -->
+                <hr>
+                <!-- Paginacion e informacion de la tabla -->
+                <div class="mt-5  flex justify-between" >
+                    <!-- Informacion -->
+                    <div>
+                        <span>
+                            Página : {{ categories.current_page }}
+                        </span>
+                        <span>
+                            Total : {{ categories.to }}
+                        </span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="text-2xl space-x-5">
+                        <!-- Anterior -->
+                        <Link
+                            class=""
+                            :href="categories.prev_page_ur ? categories.prev_page_ur : '' " >
+                            <i class="fa-solid fa-circle-arrow-left hover:scale-125 duration-300"></i>
+                        </Link>
+
+                        <!-- Siguiente -->
+                        <Link
+                            :href="categories.next_page_url ? categories.next_page_url : '' " >
+                            <i class="fa-solid fa-circle-arrow-right hover:scale-125 duration-300"></i>
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
 

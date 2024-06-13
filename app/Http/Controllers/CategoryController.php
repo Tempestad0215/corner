@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -12,11 +14,20 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+
+        // Para buscar
+        $search = $request->get('search');
+
         // Sacar los datos
         $data = Category::where('status', false)
-            ->simplePaginate(15);
+            ->where(function(Builder $query) use ($search){
+                $query->where('name','LIKE','%'.$search.'%')
+                    ->orWhere('description','LIKE','%'.$search.'%');
+            })
+            ->latest()
+            ->simplePaginate();
 
         // Devolve los datos
         return Inertia::render('Categories/Index',[
@@ -82,7 +93,7 @@ class CategoryController extends Controller
     {
         try {
             // Conseguir el primer categoria con las descripcio hecha
-            $category = Category::where('status', true)
+            $category = Category::where('status', false)
                 ->where('code', $code)
                 ->first();
 
@@ -105,8 +116,24 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(String $code)
     {
-        //
+        try {
+
+            // Buscar los datos para deshabilitar
+            $category = Category::where('status', false)
+                ->where('code', $code)
+                ->first();
+
+            // Actualizar los datos
+            $category->status = true;
+            $category->save();
+
+            // Devolver hacia atras
+            return back();
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }

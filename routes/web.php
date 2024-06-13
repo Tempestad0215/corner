@@ -22,6 +22,7 @@ Route::name('category.')->controller(CategoryController::class)
         Route::get('/','index')->name('index');
         Route::post('/','store')->name('store');
         Route::patch('/{code}','update')->name('update');
+        Route::patch('/delete/{code}','destroy')->name('destroy');
     });
 
 
