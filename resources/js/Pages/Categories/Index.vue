@@ -4,6 +4,8 @@ import AppLayout from "../../Layouts/AppLayout.vue";
 import InputError from "@/Components/InputError.vue";
 import { successHttp } from "@/Helpers/alert";
 import Swal from "sweetalert2";
+import Pagination from "@/Components/Pagination.vue";
+
 
 const props = defineProps({
     categories:{
@@ -102,6 +104,12 @@ const search = () => {
     });
 }
 
+// Limpiar el formulario
+const formClear = () => {
+    // Limpiar los datos del formulario
+    form.reset();
+}
+
 
 
 
@@ -174,6 +182,7 @@ const search = () => {
                 <div class=" pt-5 space-x-5 text-right">
                     <!-- Limpiar los datos -->
                     <button
+                        @click="formClear"
                         class="btn-reset"
                         type="reset">
                         Limpiar
@@ -257,34 +266,7 @@ const search = () => {
 
                 <!-- Linea divisora -->
                 <hr>
-                <!-- Paginacion e informacion de la tabla -->
-                <div class="mt-5  flex justify-between" >
-                    <!-- Informacion -->
-                    <div>
-                        <span>
-                            Página : {{ categories.current_page }}
-                        </span>
-                        <span>
-                            Total : {{ categories.to }}
-                        </span>
-                    </div>
-
-                    <!-- Botones -->
-                    <div class="text-2xl space-x-5">
-                        <!-- Anterior -->
-                        <Link
-                            class=""
-                            :href="categories.prev_page_ur ? categories.prev_page_ur : '' " >
-                            <i class="fa-solid fa-circle-arrow-left hover:scale-125 duration-300"></i>
-                        </Link>
-
-                        <!-- Siguiente -->
-                        <Link
-                            :href="categories.next_page_url ? categories.next_page_url : '' " >
-                            <i class="fa-solid fa-circle-arrow-right hover:scale-125 duration-300"></i>
-                        </Link>
-                    </div>
-                </div>
+                <Pagination :data="categories" />
             </div>
         </div>
 

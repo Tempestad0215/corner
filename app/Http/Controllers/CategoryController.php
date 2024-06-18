@@ -23,7 +23,8 @@ class CategoryController extends Controller
         // Sacar los datos
         $data = Category::where('status', false)
             ->where(function(Builder $query) use ($search){
-                $query->where('name','LIKE','%'.$search.'%')
+                $query->where('code','LIKE','%'.$search.'%')
+                    ->orWhere('name','LIKE','%'.$search.'%')
                     ->orWhere('description','LIKE','%'.$search.'%');
             })
             ->latest()

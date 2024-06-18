@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +24,14 @@ Route::name('category.')->controller(CategoryController::class)
         Route::post('/','store')->name('store');
         Route::patch('/{code}','update')->name('update');
         Route::patch('/delete/{code}','destroy')->name('destroy');
+    });
+
+
+// Productos
+Route::name('product.')->controller(ProductController::class)
+    ->prefix('product')
+    ->group(function(){
+        Route::get('/','index')->name('index');
     });
 
 

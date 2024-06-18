@@ -58,7 +58,7 @@ const logout = () => {
                                 <NavLink :href="route('category.index')" >
                                     Categorias
                                 </NavLink>
-                                <NavLink :href="route('dashboard')">
+                                <NavLink :href="route('product.index')">
                                     Productos
                                 </NavLink>
                                 <NavLink :href="route('dashboard')">
