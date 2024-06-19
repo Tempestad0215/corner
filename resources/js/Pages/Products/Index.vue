@@ -1,6 +1,57 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '../../Layouts/AppLayout.vue';
+import { reactive, ref } from 'vue';
+import axios from 'axios';
+
+
+
+const categories = ref([])
+
+// Para ver vetaana
+const showCategory = ref(false);
+
+
+// Formulario
+const form = useForm({
+    name:"",
+    description:"",
+    category_id:0,
+    category_name:"",
+    stock:"",
+    price:"",
+    cost:""
+});
+
+const config = reactive({
+    masked: false,
+
+});
+
+
+
+// Funciones
+
+// conseguir la categoria
+const getCategory = () => {
+
+    // Para activar y descativar todo
+    if(form.category_name.length < 1)
+    {
+        showCategory.value = false;
+    }else{
+        // PAra activar la ventana
+        showCategory.value = true;
+
+        // Hacer la peticion para buscar la categorias
+        axios.get(`/category/get?search=${form.category_name}`)
+            .then((res) =>{
+
+                categories.value = res.data;
+            });
+    }
+}
+
 
 
 </script>
@@ -52,6 +103,46 @@ import AppLayout from '../../Layouts/AppLayout.vue';
                         class="input w-full">
                 </div>
 
+
+
+
+
+                <!-- Categoria de producto -->
+                <div>
+                    <label
+                        for="category"
+                        class="label">
+                        Categoria
+                    </label>
+                    <div class="relative" >
+                        <input
+                            @click=" showCategory = !showCategory"
+                            @input="getCategory()"
+                            v-model="form.category_name"
+                            type="text"
+                            class="input w-full">
+
+                        <!-- Contenido de las categorias -->
+                        <div
+                            v-if="showCategory"
+                            class=" absolute w-full bg-gray-200 rounded-2xl mt-1">
+                            <ol v-for="(item, index) in categories" :key="index">
+                                <p class=" grid grid-cols-3 border-b-2 border-gray-500 rounded-2xl px-5 py-1">
+                                    <span>
+                                        {{ item.code }}
+                                    </span>
+                                    <span>
+                                        {{ item.name }}
+                                    </span>
+                                    <span class=" max-w-[200px] truncate">
+                                        {{ item.description }}
+                                    </span>
+                                </p>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Junto -->
                 <div class=" grid grid-cols-3 gap-3">
 
@@ -62,10 +153,11 @@ import AppLayout from '../../Layouts/AppLayout.vue';
                             class="label">
                             Precio
                         </label>
-                        <input
-                            name="precio"
-                            type="text"
-                            class="input w-full">
+                        <money3
+                            class="input w-full"
+                            v-model="form.price "
+                            v-bind="config">
+                        </money3>
                     </div>
 
                     <!-- Cantidad -->
@@ -75,10 +167,11 @@ import AppLayout from '../../Layouts/AppLayout.vue';
                             class="label">
                             Cantidad
                         </label>
-                        <input
-                            name="stock"
-                            type="text"
-                            class="input w-full">
+                        <money3
+                            class="input w-full"
+                            v-model="form.stock "
+                            v-bind="config">
+                        </money3>
                     </div>
 
                     <!-- Costo -->
@@ -88,10 +181,11 @@ import AppLayout from '../../Layouts/AppLayout.vue';
                             class="label">
                             Costo
                         </label>
-                        <input
-                            name="cost"
-                            type="text"
-                            class="input w-full">
+                        <money3
+                            class="input w-full"
+                            v-model="form.cost  "
+                            v-bind="config">
+                        </money3>
                     </div>
                 </div>
 

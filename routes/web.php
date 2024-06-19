@@ -24,6 +24,7 @@ Route::name('category.')->controller(CategoryController::class)
         Route::post('/','store')->name('store');
         Route::patch('/{code}','update')->name('update');
         Route::patch('/delete/{code}','destroy')->name('destroy');
+        Route::get('/get','get')->name('get');
     });
 
 

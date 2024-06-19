@@ -19,6 +19,7 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
-        "sweetalert2": "^11.11.1"
+        "sweetalert2": "^11.11.1",
+        "v-money3": "^3.24.1"
     }
 }

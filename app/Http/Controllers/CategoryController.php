@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use JsonException;
 
 class CategoryController extends Controller
 {
@@ -135,6 +136,28 @@ class CategoryController extends Controller
 
         } catch (\Throwable $th) {
             throw $th;
+        }
+    }
+
+    // Para conseguir las categorias
+    public function get(Request $request)
+    {
+        try {
+
+            // Para buscar los datos
+            $search = $request->get('search');
+
+            // Buscar los datos
+            $data = Category::where('status', false)
+                ->where('name','LIKE','%'. $search .'%')
+                ->limit(10)
+                ->get();
+
+            return response()->json($data);
+
+        } catch (\Throwable $th) {
+            // Enviar un mensaje de error
+            throw new JsonException($th->getMessage(), 400);
         }
     }
 }
