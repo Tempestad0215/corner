@@ -27,7 +27,7 @@ class StoreProductRequest extends FormRequest
             'stock' => ['required','numeric'],
             'price' => ['required','numeric'],
             'cost' => ['required','numeric'],
-            'branch_id' => ['required','numeric','exists:categories,id']
+            'category_id' => ['required','numeric','exists:categories,id']
         ];
     }
 }

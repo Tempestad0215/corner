@@ -3,7 +3,9 @@ import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '../../Layouts/AppLayout.vue';
 import { reactive, ref } from 'vue';
 import axios from 'axios';
-
+import Pagination from '@/Components/Pagination.vue';
+import InputError from '@/Components/InputError.vue';
+import { successHttp } from '@/Helpers/alert';
 
 
 const categories = ref([])
@@ -14,14 +16,19 @@ const showCategory = ref(false);
 
 // Formulario
 const form = useForm({
-    name:"",
-    description:"",
-    category_id:0,
-    category_name:"",
-    stock:"",
-    price:"",
-    cost:""
+    name: "",
+    description: "",
+    category_id: 0,
+    category_name: "",
+    stock: "",
+    price: "",
+    cost: ""
 });
+
+// Formulario de busqueda
+const formSearch = useForm({
+    search:""
+})
 
 const config = reactive({
     masked: false,
@@ -52,6 +59,23 @@ const getCategory = () => {
     }
 }
 
+// seleccionar la categoria
+const selectCategory = (item) => {
+    form.category_name = item.name;
+    form.category_id = item.id;
+
+    // Cerrar la ventana
+    showCategory.value = false;
+}
+
+// enviar los datos del formulario
+const submit = () => {
+    form.post(route('product.store'),{
+        onSuccess:()=>{
+            successHttp('Datos registrados correctamente');
+        }
+    })
+}
 
 
 </script>
@@ -71,11 +95,11 @@ const getCategory = () => {
         <div>
             <form
                 class="form"
-                action="">
+                @submit.prevent="submit" >
 
                 <!-- Titulo -->
                 <h3 class=" text-2xl font-bold text-center">
-                    Registro de productos
+                    Registro de Productos
                 </h3>
 
                 <!-- Nombre -->
@@ -86,8 +110,12 @@ const getCategory = () => {
                         Nombre
                     </label>
                     <input
+                        v-model="form.name"
                         type="text"
                         class="input w-full">
+
+                    <!-- Error -->
+                    <InputError :message="form.errors.name"/>
                 </div>
 
                 <!-- Nombre -->
@@ -98,9 +126,14 @@ const getCategory = () => {
                         Descripción
                     </label>
                     <input
+                        v-model="form.description"
                         name="description"
                         type="text"
                         class="input w-full">
+
+                    <!-- Error -->
+                    <InputError :message="form.errors.description"/>
+
                 </div>
 
 
@@ -127,7 +160,9 @@ const getCategory = () => {
                             v-if="showCategory"
                             class=" absolute w-full bg-gray-200 rounded-2xl mt-1">
                             <ol v-for="(item, index) in categories" :key="index">
-                                <p class=" grid grid-cols-3 border-b-2 border-gray-500 rounded-2xl px-5 py-1">
+                                <p
+                                    @click="selectCategory(item)"
+                                    class=" grid grid-cols-3 border-b-2 border-gray-500 rounded-2xl px-5 py-1">
                                     <span>
                                         {{ item.code }}
                                     </span>
@@ -140,6 +175,9 @@ const getCategory = () => {
                                 </p>
                             </ol>
                         </div>
+
+                        <!-- Error -->
+                        <InputError :message="form.errors.category_id"/>
                     </div>
                 </div>
 
@@ -158,6 +196,9 @@ const getCategory = () => {
                             v-model="form.price "
                             v-bind="config">
                         </money3>
+
+                        <!-- Error -->
+                        <InputError :message="form.errors.price"/>
                     </div>
 
                     <!-- Cantidad -->
@@ -172,6 +213,9 @@ const getCategory = () => {
                             v-model="form.stock "
                             v-bind="config">
                         </money3>
+
+                        <!-- Error -->
+                        <InputError :message="form.errors.stock"/>
                     </div>
 
                     <!-- Costo -->
@@ -186,6 +230,9 @@ const getCategory = () => {
                             v-model="form.cost  "
                             v-bind="config">
                         </money3>
+
+                        <!-- Error -->
+                        <InputError :message="form.errors.cost"/>
                     </div>
                 </div>
 
@@ -207,6 +254,82 @@ const getCategory = () => {
                 </div>
 
             </form>
+
+
+            <!-- Datos de la tabla -->
+            <div class="my-7">
+                <hr>
+            </div>
+            <!-- Tabla del contenido de los datos -->
+            <div class="mt-5  bg-white mx-5 p-5 rounded-2xl shadow-2xl">
+                <h3 class="titulo" >
+                    Tabla de Productos
+                </h3>
+
+                <!-- Formulario para busqueda -->
+                <form
+                    @submit.prevent="search"
+                    class=" lg:max-w-md" >
+                    <div>
+                        <label
+                            class="block"
+                            for="name">
+                            Buscar
+                        </label>
+                        <div class=" relative flex items-center">
+                            <input
+                                class="input w-full pr-10"
+                                placeholder="Busqueda"
+                                type="text"
+                                v-model="formSearch.search">
+                            <!-- Boton para la busqueda -->
+                            <i
+                                @click="search"
+                                class="fa-solid fa-magnifying-glass text-2xl absolute inset-y-0 right-0 py-1 px-3 "></i>
+                        </div>
+                        <!-- Error -->
+                        <InputError :message="formSearch.errors.search"/>
+                    </div>
+                </form>
+
+                <!-- Tabla de los datos -->
+                <table class=" table-auto w-full">
+                    <!-- Cabecera de la ventana -->
+                    <thead class=" text-left">
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Act</th>
+                        </tr>
+                    </thead>
+
+                    <!-- Contenido de la cabeza -->
+                     <tbody>
+                        <tr
+                            class=" odd:bg-gray-300 rounded-2xl"
+                            v-for="(item, index) in categories.data" >
+                            <td class=" px-2">{{item.code}}</td>
+                            <td class=" px-2">{{item.name}}</td>
+                            <td class=" px-2">{{item.description}}</td>
+                            <td class=" px-2 space-x-5 text-xl" >
+                                <!-- Editar -->
+                                <i
+                                    @click="edit(item)"
+                                    class="fa-regular fa-pen-to-square hover:scale-125 duration-300"></i>
+                                <!-- Eliminar -->
+                                <i
+                                    @click="destroy(item)"
+                                    class="fa-solid fa-trash-can hover:scale-125 duration-300"></i>
+                            </td>
+                        </tr>
+                     </tbody>
+                </table>
+
+                <!-- Linea divisora -->
+                <hr>
+                <Pagination :data="categories" />
+            </div>
         </div>
     </AppLayout>
 

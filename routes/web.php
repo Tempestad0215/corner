@@ -33,6 +33,7 @@ Route::name('product.')->controller(ProductController::class)
     ->prefix('product')
     ->group(function(){
         Route::get('/','index')->name('index');
+        Route::post('/','store')->name('store');
     });
 
 

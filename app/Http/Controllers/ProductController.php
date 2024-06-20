@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\ProductTrans;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -12,10 +15,14 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Devolver la vista con los datos
         try {
+            // Buscar los datos
+            $search = $request->get('search');
+
+
             //
             return Inertia::render('Products/Index');
 
@@ -37,7 +44,31 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        //
+        try {
+
+            // Para asegurar de que todo
+            DB::transaction(function() use ($request){
+
+                // Guardar los datos validados
+                $product = Product::create($request->validated());
+
+                // Devolver hacia atras con los productos
+                ProductTrans::create([
+                    'product_id' => $product->id,
+                    'quantity' => $product->stock,
+                    'price' => $product->price,
+                    'cost' => $product->cost
+                ]);
+            });
+
+            // Devolver hacia atras
+            return back();
+
+
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     /**
