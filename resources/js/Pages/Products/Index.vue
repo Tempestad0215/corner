@@ -8,6 +8,14 @@ import InputError from '@/Components/InputError.vue';
 import { successHttp } from '@/Helpers/alert';
 
 
+// Propiedad de la ventana
+const props = defineProps({
+    products: {
+        type: Object,
+        required: true
+    }
+})
+
 const categories = ref([])
 
 // Para ver vetaana

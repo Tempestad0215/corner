@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\ProductTrans;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -22,12 +23,28 @@ class ProductController extends Controller
             // Buscar los datos
             $search = $request->get('search');
 
+            // Consguir los datos
+            $products = Product::whereHas('category', function(Builder $query) use ($search) {
+                $query->where('name','like','%'. $search .'%');
+            })
+            ->with('category')
+            ->where('status',false)
+            ->where(function(Builder $query) use ($search) {
+                $query->where('name','like','%'. $search .'%');
+            })
+            ->latest()
+            ->simplePaginate();
+
+            return $products;
 
             //
-            return Inertia::render('Products/Index');
+            // return Inertia::render('Products/Index',[
+            //     'products ' => $products
+            // ]);
 
         } catch (\Throwable $th) {
             throw $th;
+
         }
     }
 

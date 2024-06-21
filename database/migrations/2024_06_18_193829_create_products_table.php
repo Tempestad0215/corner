@@ -21,6 +21,7 @@ return new class extends Migration
             $table->float('price',19,2);
             $table->float('cost',19,2);
             $table->foreignIdFor(Category::class, 'category_id');
+            $table->boolean('status')->default(false);
             $table->timestamps();
         });
     }
