@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('code',20);
             $table->string('name', 50);
             $table->string('description',150);
-            $table->float('stock',19,2);
-            $table->float('price',19,2);
-            $table->float('cost',19,2);
+            $table->float('stock',19.2);
+            $table->float('price',19.2);
+            $table->float('cost',19.2);
             $table->foreignIdFor(Category::class, 'category_id');
             $table->boolean('status')->default(false);
             $table->timestamps();

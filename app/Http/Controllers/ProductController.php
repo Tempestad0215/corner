@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Http\Resources\ProCatResource;
 use App\Models\ProductTrans;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -24,23 +25,26 @@ class ProductController extends Controller
             $search = $request->get('search');
 
             // Consguir los datos
-            $products = Product::whereHas('category', function(Builder $query) use ($search) {
-                $query->where('name','like','%'. $search .'%');
-            })
-            ->with('category')
-            ->where('status',false)
-            ->where(function(Builder $query) use ($search) {
-                $query->where('name','like','%'. $search .'%');
-            })
-            ->latest()
-            ->simplePaginate();
+            $products = Product::where('status',false)
+                ->where(function(Builder $query) use ($search) {
+                    $query->where('name','like','%'. $search .'%')
+                        ->orWhere('code','like','%'. $search.'%' );
+                })
+                ->orWhereHas('category', function(Builder $query) use ($search) {
+                    $query->where('name','like','%'. $search .'%');
+                })
+                ->latest()
+                ->simplePaginate();
 
-            return $products;
+            // Formaterar los datos
+            $productFormat = ProCatResource::collection($products)->response()->getData(true);
 
-            //
-            // return Inertia::render('Products/Index',[
-            //     'products ' => $products
-            // ]);
+
+
+            // DEvolver los datos
+            return Inertia::render('Products/Index',[
+                'products' => $productFormat
+            ]);
 
         } catch (\Throwable $th) {
             throw $th;

@@ -6,6 +6,7 @@ import axios from 'axios';
 import Pagination from '@/Components/Pagination.vue';
 import InputError from '@/Components/InputError.vue';
 import { successHttp } from '@/Helpers/alert';
+import Swal from 'sweetalert2';
 
 
 // Propiedad de la ventana
@@ -85,6 +86,41 @@ const submit = () => {
     })
 }
 
+// Para la busqueda
+const search = () => {
+    // Hacer la busqueda
+    formSearch.get(route('product.index'),{
+        preserveScroll: true,
+        preserveState: true
+    });
+}
+
+// Editar las ordenes
+const edit = (item) => {
+    Swal.fire({
+        title: `Desea editar el producto : ${item.name} ?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si, editar!",
+        cancelButtonText: "Cancelar"
+        }).then((result) => {
+        if (result.isConfirmed) {
+
+            // Pasar los datos
+            form.name = item.name;
+            form.description = item.description;
+            form.category_id = item.category.id;
+            form.category_name = item.category.name;
+            form.price = item.price;
+            form.quantity = item.stock;
+            form.cost = item.cost
+
+        }
+    });
+}
+
 
 </script>
 
@@ -120,6 +156,7 @@ const submit = () => {
                     <input
                         v-model="form.name"
                         type="text"
+                        placeholder="Nombre"
                         class="input w-full">
 
                     <!-- Error -->
@@ -137,6 +174,7 @@ const submit = () => {
                         v-model="form.description"
                         name="description"
                         type="text"
+                        placeholder="Detalle del producto"
                         class="input w-full">
 
                     <!-- Error -->
@@ -161,6 +199,7 @@ const submit = () => {
                             @input="getCategory()"
                             v-model="form.category_name"
                             type="text"
+                            placeholder="-- Busque y seleccione la categoria --"
                             class="input w-full">
 
                         <!-- Contenido de las categorias -->
@@ -307,7 +346,8 @@ const submit = () => {
                         <tr>
                             <th>Id</th>
                             <th>Nombre</th>
-                            <th>Descripción</th>
+                            <th>Categoria</th>
+                            <th>Disponible</th>
                             <th>Act</th>
                         </tr>
                     </thead>
@@ -316,10 +356,11 @@ const submit = () => {
                      <tbody>
                         <tr
                             class=" odd:bg-gray-300 rounded-2xl"
-                            v-for="(item, index) in categories.data" >
+                            v-for="(item, index) in products.data" >
                             <td class=" px-2">{{item.code}}</td>
                             <td class=" px-2">{{item.name}}</td>
-                            <td class=" px-2">{{item.description}}</td>
+                            <td class=" px-2">{{item.category.name}}</td>
+                            <td class=" px-2">{{(item.stock).toFixed(2)}}</td>
                             <td class=" px-2 space-x-5 text-xl" >
                                 <!-- Editar -->
                                 <i
