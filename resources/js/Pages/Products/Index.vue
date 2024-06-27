@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '../../Layouts/AppLayout.vue';
 import { reactive, ref } from 'vue';
 import axios from 'axios';
@@ -8,6 +8,8 @@ import InputError from '@/Components/InputError.vue';
 import { successHttp } from '@/Helpers/alert';
 import Swal from 'sweetalert2';
 
+
+const page = usePage();
 
 // Propiedad de la ventana
 const props = defineProps({
@@ -25,13 +27,12 @@ const showCategory = ref(false);
 
 // Formulario
 const form = useForm({
+    id:"",
     name: "",
     description: "",
     category_id: 0,
     category_name: "",
-    stock: "",
-    price: "",
-    cost: ""
+    update: false
 });
 
 // Formulario de busqueda
@@ -79,11 +80,25 @@ const selectCategory = (item) => {
 
 // enviar los datos del formulario
 const submit = () => {
-    form.post(route('product.store'),{
-        onSuccess:()=>{
-            successHttp('Datos registrados correctamente');
-        }
-    })
+
+    // Verificar si es actualizar
+    if(form.update)
+    {
+        form.patch(route('product.update', form.id),{
+            onSuccess:()=>{
+                successHttp('Datos actualizado correctamente');
+                form.reset();
+            }
+        })
+    }else{
+        // Enviar los datos para guardar
+        form.post(route('product.store'),{
+            onSuccess:()=>{
+                successHttp('Datos registrados correctamente');
+            }
+        });
+    }
+
 }
 
 // Para la busqueda
@@ -109,14 +124,45 @@ const edit = (item) => {
         if (result.isConfirmed) {
 
             // Pasar los datos
+            form.id = item.id;
             form.name = item.name;
             form.description = item.description;
             form.category_id = item.category.id;
             form.category_name = item.category.name;
-            form.price = item.price;
-            form.quantity = item.stock;
-            form.cost = item.cost
 
+            // Ponerlo listo para actualizar
+            form.update = true;
+
+        }
+    });
+}
+
+// Eliminar los datos
+const destroy = (item) => {
+    Swal.fire({
+        title: `Desea eliminar el producto : ${item.name}?`,
+        text: "Los cambios realizados son irreversible!",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Si, Eliminar!",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            // Pasar los datos
+            form.id = item.id;
+
+            // Actualizar los datos
+            form.patch(route('product.destroy', form.id),{
+                onSuccess:()=>{
+                    successHttp('Registro eliminado correctamente');
+                    form.reset();
+                },
+                preserveScroll: true,
+                preserveState: true
+            })
         }
     });
 }
@@ -143,7 +189,8 @@ const edit = (item) => {
 
                 <!-- Titulo -->
                 <h3 class=" text-2xl font-bold text-center">
-                    Registro de Productos
+                    {{ form.update ? 'Actualización' : 'Registro' }}
+                    de producto
                 </h3>
 
                 <!-- Nombre -->
@@ -183,9 +230,6 @@ const edit = (item) => {
                 </div>
 
 
-
-
-
                 <!-- Categoria de producto -->
                 <div>
                     <label
@@ -205,7 +249,7 @@ const edit = (item) => {
                         <!-- Contenido de las categorias -->
                         <div
                             v-if="showCategory"
-                            class=" absolute w-full bg-gray-200 rounded-2xl mt-1">
+                            class=" absolute w-full bg-gray-200 rounded-2xl mt-1 z-30">
                             <ol v-for="(item, index) in categories" :key="index">
                                 <p
                                     @click="selectCategory(item)"
@@ -213,7 +257,7 @@ const edit = (item) => {
                                     <span>
                                         {{ item.code }}
                                     </span>
-                                    <span>
+                                    <span class=" max-w-[150px] truncate">
                                         {{ item.name }}
                                     </span>
                                     <span class=" max-w-[200px] truncate">
@@ -228,75 +272,18 @@ const edit = (item) => {
                     </div>
                 </div>
 
-                <!-- Junto -->
-                <div class=" grid grid-cols-3 gap-3">
-
-                    <!-- Precio -->
-                    <div>
-                        <label
-                            for="precio"
-                            class="label">
-                            Precio
-                        </label>
-                        <money3
-                            class="input w-full"
-                            v-model="form.price "
-                            v-bind="config">
-                        </money3>
-
-                        <!-- Error -->
-                        <InputError :message="form.errors.price"/>
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div>
-                        <label
-                            for="stock"
-                            class="label">
-                            Cantidad
-                        </label>
-                        <money3
-                            class="input w-full"
-                            v-model="form.stock "
-                            v-bind="config">
-                        </money3>
-
-                        <!-- Error -->
-                        <InputError :message="form.errors.stock"/>
-                    </div>
-
-                    <!-- Costo -->
-                    <div>
-                        <label
-                            for="cost"
-                            class="label">
-                            Costo
-                        </label>
-                        <money3
-                            class="input w-full"
-                            v-model="form.cost  "
-                            v-bind="config">
-                        </money3>
-
-                        <!-- Error -->
-                        <InputError :message="form.errors.cost"/>
-                    </div>
-                </div>
-
-                <!-- Botones -->
-                <div class="mt-5 space-x-5 text-right">
-                    <!-- Limpiar los datos -->
+                <!-- Botones de enviar -->
+                <div class=" space-x-5 text-right mt-5">
                     <button
+                        @click="form.reset()"
                         class="btn-reset"
                         type="reset">
                         Limpiar
                     </button>
-
-                    <!-- Enviar los datos -->
-                     <button
+                    <button
                         class="btn-send"
                         type="submit">
-                        Registrar
+                        {{ form.update ? 'Actualizar' : 'Registrar' }}
                     </button>
                 </div>
 
@@ -347,8 +334,11 @@ const edit = (item) => {
                             <th>Id</th>
                             <th>Nombre</th>
                             <th>Categoria</th>
-                            <th>Disponible</th>
-                            <th>Act</th>
+                            <th>Descrición</th>
+                            <th
+                                v-if="page.props.auth.user.role === '1'" >
+                                Act
+                            </th>
                         </tr>
                     </thead>
 
@@ -360,8 +350,10 @@ const edit = (item) => {
                             <td class=" px-2">{{item.code}}</td>
                             <td class=" px-2">{{item.name}}</td>
                             <td class=" px-2">{{item.category.name}}</td>
-                            <td class=" px-2">{{(item.stock).toFixed(2)}}</td>
-                            <td class=" px-2 space-x-5 text-xl" >
+                            <td class=" px-2 max-w-[250px] truncate">{{item.description}}</td>
+                            <td
+                                v-if="page.props.auth.user.role === '1'"
+                                class=" px-2 space-x-5 text-xl" >
                                 <!-- Editar -->
                                 <i
                                     @click="edit(item)"
@@ -377,7 +369,12 @@ const edit = (item) => {
 
                 <!-- Linea divisora -->
                 <hr>
-                <Pagination :data="categories" />
+                <Pagination
+                    :total="products.meta.to"
+                    :page="products.meta.current_page"
+                    :prev="products.links.prev"
+                    :next="products.links.next" />
+
             </div>
         </div>
     </AppLayout>

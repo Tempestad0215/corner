@@ -1,11 +1,13 @@
 <script setup>
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/vue3";
 import AppLayout from "../../Layouts/AppLayout.vue";
 import InputError from "@/Components/InputError.vue";
 import { successHttp } from "@/Helpers/alert";
 import Swal from "sweetalert2";
 import Pagination from "@/Components/Pagination.vue";
 
+
+const page = usePage();
 
 const props = defineProps({
     categories:{
@@ -238,7 +240,10 @@ const formClear = () => {
                             <th>Id</th>
                             <th>Nombre</th>
                             <th>Descripción</th>
-                            <th>Act</th>
+                            <th
+                                v-if="page.props.auth.user.role === '1'"
+                                >Act
+                            </th>
                         </tr>
                     </thead>
 
@@ -249,8 +254,10 @@ const formClear = () => {
                             v-for="(item, index) in categories.data" >
                             <td class=" px-2">{{item.code}}</td>
                             <td class=" px-2">{{item.name}}</td>
-                            <td class=" px-2">{{item.description}}</td>
-                            <td class=" px-2 space-x-5 text-xl" >
+                            <td class=" px-2 max-w-[300px] truncate">{{item.description}}</td>
+                            <td
+                                v-if="page.props.auth.user.role === '1'"
+                                class=" px-2 space-x-5 text-xl" >
                                 <!-- Editar -->
                                 <i
                                     @click="edit(item)"
@@ -266,7 +273,12 @@ const formClear = () => {
 
                 <!-- Linea divisora -->
                 <hr>
-                <Pagination :data="categories" />
+                <Pagination
+                    :page="categories.current_page"
+                    :total="categories.to"
+                    :prev="categories.prev_page_url"
+                    :next="categories.next_page_url"
+                    />
             </div>
         </div>
 

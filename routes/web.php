@@ -34,6 +34,8 @@ Route::name('product.')->controller(ProductController::class)
     ->group(function(){
         Route::get('/','index')->name('index');
         Route::post('/','store')->name('store');
+        Route::patch('/{product}','update')->name('update');
+        Route::patch('/delete/{product}','destroy')->name('destroy');
     });
 
 

@@ -3,9 +3,19 @@ import { Link } from '@inertiajs/vue3';
 
 
 const props = defineProps({
-    data: {
-        type: Object,
+    page: {
+        type: Number,
         required: true
+    },
+    total: {
+        type: Number,
+        required: true
+    },
+    next:{
+        type: [String, null],
+    },
+    prev:{
+        type: [String, null],
     }
 })
 
@@ -19,10 +29,10 @@ const props = defineProps({
         <!-- Informacion -->
         <div>
             <span>
-                Página : {{ props.data.current_page }}
+                Página : {{ props.page }}
             </span>
             <span>
-                Total : {{ props.data.to }}
+                Total : {{ props.total }}
             </span>
         </div>
 
@@ -31,13 +41,13 @@ const props = defineProps({
             <!-- Anterior -->
             <Link
                 class=""
-                :href="props.data.prev_page_ur ? props.data.prev_page_ur : '' " >
+                :href="props.prev ? props.prev : '' " >
                 <i class="fa-solid fa-circle-arrow-left hover:scale-125 duration-300"></i>
             </Link>
 
             <!-- Siguiente -->
             <Link
-                :href="props.data.next_page_url ? props.data.next_page_url : '' " >
+                :href="props.next ? props.next : '' " >
                 <i class="fa-solid fa-circle-arrow-right hover:scale-125 duration-300"></i>
             </Link>
         </div>
